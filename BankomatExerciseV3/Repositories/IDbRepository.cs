@@ -13,10 +13,14 @@ namespace BankomatExerciseV3.Repositories
         List<Banche> GetBanks();
         SortedList<int, Banche> GetSortedBanks();
 
-        bool CheckUsername(string username);
+        bool CheckUsername(string username, int idBanca);
+        bool IsBlocked(string username, int idBanca);
         Utenti CheckAccountCredentials(string username, string password,int idBanca);
+        Utenti CheckAccountCredentialsV2(string username, string password, int idBanca);
 
         int GetBankIdByUserInputChoice(SortedList<int, Banche> sortedListBanks,int choice);
+
+        void ChangeBlockState(string username);
 
 
 

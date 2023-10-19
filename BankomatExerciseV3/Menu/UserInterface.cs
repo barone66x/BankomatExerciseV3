@@ -16,6 +16,9 @@ namespace BankomatExerciseV3.Menu
         private Utenti _currentUser;
         private BankController _controller;
         private Checker _check;
+        private int _loginFailedCount = 0;
+        private string _username;
+        private int _databaseBankId;
         public UserInterface(BankController controller,Checker check)
         {
             _controller = controller;
@@ -26,7 +29,7 @@ namespace BankomatExerciseV3.Menu
         {
             int choiceBank = 0;
             bool checkLogin = false;
-            int loginFailedCount = 0;
+            
             var sortedListBanks =  _controller.GetSortedBanks();
 
             Console.WriteLine("Welcome to Bankomat V3");
@@ -39,17 +42,23 @@ namespace BankomatExerciseV3.Menu
             }
             while (choiceBank == -1);
 
-            while (checkLogin == false & loginFailedCount <3)           
+            while (checkLogin == false & _loginFailedCount <3)           
             {
                 checkLogin =  Login(sortedListBanks, choiceBank);
-                if (checkLogin == false)
-                {
-                    loginFailedCount++;
-                }
+                //if (checkLogin == false)
+                //{
+                //    loginFailedCount++;
+                //}
             }
-            if (loginFailedCount >=3)
+            if (_loginFailedCount >=3)
             {
-                Console.WriteLine("implement block user");
+                if (!_controller.CheckUserBlocked(_username, _databaseBankId))
+                {
+                    _controller.ChangeUserState(_username);
+
+                }
+                
+                Console.WriteLine("blocked user");
             }
             else
             {
@@ -90,22 +99,28 @@ namespace BankomatExerciseV3.Menu
 
         private  bool Login(SortedList<int,Banche> sortedListBanks, int choiceBank)
         {
-             BankList(sortedListBanks);
+             //BankList(sortedListBanks);
 
             Console.WriteLine("enter username");
-            var username = Console.ReadLine();
+             _username = Console.ReadLine();
             Console.WriteLine("enter password");
             var password = Console.ReadLine();
 
-            var databaseBankId = _controller.GetBankIdByUserInputChoice(sortedListBanks, choiceBank);
-
-            _currentUser =  _controller.CheckAccountCredentials(username, password, databaseBankId);
-            if (_currentUser == null)
+             _databaseBankId = _controller.GetBankIdByUserInputChoice(sortedListBanks, choiceBank);
+            if (_controller.CheckUsername(_username, _databaseBankId))
             {
-                Console.WriteLine("login failed");
-                return false;
+                _currentUser = _controller.CheckAccountCredentials(_username, password, _databaseBankId);
+                if (_currentUser == null)
+                {
+                    Console.WriteLine("login failed");
+                    _loginFailedCount++;
+                    return false;
+                }
+                return true;
+
             }
-            return true;
+            return false;
+            
         }
     }
 }

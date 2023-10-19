@@ -32,9 +32,9 @@ namespace BankomatExerciseV3.Controllers
             return  _dbRepository.GetSortedBanks();
         }
 
-        public bool CheckUsername(string username)
+        public bool CheckUsername(string username, int idBank)
         {
-            var result =  _dbRepository.CheckUsername(username);
+            var result =  _dbRepository.CheckUsername(username, idBank);
             return result;
         }
 
@@ -48,6 +48,19 @@ namespace BankomatExerciseV3.Controllers
         {
             var utente = _dbRepository.GetBankIdByUserInputChoice(sortedListBanks, idBank);
             return utente;
+        }
+
+        public void ChangeUserState(string username)
+        {
+            _dbRepository.ChangeBlockState(username);
+        }
+        public bool CheckUserBlocked(string username,int idBank)
+        {
+           if( _dbRepository.IsBlocked(username,idBank))
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

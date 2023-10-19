@@ -44,15 +44,26 @@ namespace BankomatExerciseV3.Repositories
             return sortedBanche;
         }
 
-        public  bool CheckUsername(string username)
+        public  bool CheckUsername(string username, int idBanca)
         {
-            var utente =  _ctx.Utenti.Where(u => u.NomeUtente.Equals(username)).FirstOrDefault();
+            var utente =  _ctx.Utenti.Where(u => u.NomeUtente.Equals(username) & u.IdBanca == idBanca).FirstOrDefault();
             if (utente == null)
             { 
                 return false;
             }
             return true;
         }
+
+        public bool IsBlocked(string username, int idBanca)
+        {
+            var utente = _ctx.Utenti.Where(u => u.NomeUtente.Equals(username) & u.IdBanca == idBanca).FirstOrDefault();
+            if (utente.Bloccato == true)
+            {
+                return true;
+            }
+            return false;
+        }
+
 
         public Utenti CheckAccountCredentials(string username,string password,int idBanca)
         {
@@ -62,12 +73,36 @@ namespace BankomatExerciseV3.Repositories
             {
                 return null;
             }
+            if (utente.Bloccato == true) 
+            {
+                return null;
+            }
 
             if (utente.IdBanca == idBanca & utente.Password.Equals(password))
             {
                 return utente;
             }
-            else return null;
+            return null;
+        }
+
+        public Utenti CheckAccountCredentialsV2(string username, string password, int idBanca)
+        {
+            var utente = _ctx.Utenti.Where(u => u.NomeUtente.Equals(username)).FirstOrDefault();
+
+            if (utente == null)
+            {
+                return null;
+            }
+            if (utente.Bloccato == true)
+            {
+                return null;
+            }
+
+            if (utente.IdBanca == idBanca & utente.Password.Equals(password))
+            {
+                return utente;
+            }
+            return null;
         }
 
         public int GetBankIdByUserInputChoice(SortedList<int, Banche> sortedListBanks,int choice)
@@ -75,6 +110,22 @@ namespace BankomatExerciseV3.Repositories
             var userBank = sortedListBanks[choice];
             return (int)_ctx.Banche.Where(i => i.Id == userBank.Id).FirstOrDefault().Id;
              
+        }
+
+        public void ChangeBlockState(string username) 
+        { 
+            
+            var user = _ctx.Utenti.Where(u => u.NomeUtente == username).FirstOrDefault();
+            if (user.Bloccato == true)
+            {
+                user.Bloccato = false;
+            }
+            else
+            {
+                user.Bloccato = true;
+            }
+            _ctx.SaveChanges();
+        
         }
     }
 }
